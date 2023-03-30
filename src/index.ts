@@ -147,10 +147,15 @@ const main = async () => {
     if (!certificate)
       throw new Error("Something went wrong when creating certificate");
 
+    logger.info("Request certificate complete");
+
     const validationFile = await createFileValidation({
       certificate,
       projectDir,
     });
+
+    logger.info("Validation file has been created");
+    logger.info(validationFile);
   } catch (error: any) {
     logger.error(error);
   }
