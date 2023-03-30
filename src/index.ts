@@ -3,6 +3,7 @@ import FormData from "form-data";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { readFile, writeFile } from "fs/promises";
+import { existsSync, mkdirSync } from "fs";
 import { pino } from "pino";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -82,6 +83,54 @@ const createCertificate = async ({
   }
 };
 
+const createFileValidation = async ({
+  certificate,
+  projectDir,
+}: {
+  certificate: CreateCertificateResponse;
+  projectDir: string;
+}) => {
+  try {
+    // Check if `/` character exist on end of data
+    const formattedProjectDir = projectDir.replace(/\/$/, "");
+
+    // Check if folder .well-known exists in project directory
+    const isWellFolderExists = existsSync(`${formattedProjectDir}/.well-known`);
+
+    // Make .well-known directory
+    if (!isWellFolderExists) mkdirSync(`${formattedProjectDir}/.well-known`);
+
+    // Check if folder pki-validation exists in project directory
+    const isPkiValFolderExist = existsSync(
+      `${formattedProjectDir}/.well-known/pki-validation`
+    );
+
+    // Make pki-validation directory
+    if (!isPkiValFolderExist)
+      mkdirSync(`${formattedProjectDir}/.well-known/pki-validation`);
+
+    const firstKey = Object.keys(certificate.validation.other_methods)[0];
+
+    const splitValidationPath =
+      certificate.validation.other_methods[
+        firstKey
+      ].file_validation_url_http.split("/");
+
+    const fileName = splitValidationPath[splitValidationPath.length - 1];
+
+    const fileContent =
+      certificate.validation.other_methods[
+        firstKey
+      ].file_validation_content.join("\n");
+
+    await writeFile(fileName, fileContent, { encoding: "utf-8", flag: "w" });
+
+    return `${formattedProjectDir}/.well-known/pki-validation/${fileName}`;
+  } catch (error) {
+    logger.error(error);
+  }
+};
+
 const main = async () => {
   try {
     const { domain, csrPath, projectDir } = await yargs(hideBin(process.argv))
@@ -98,6 +147,10 @@ const main = async () => {
     if (!certificate)
       throw new Error("Something went wrong when creating certificate");
 
+    const validationFile = await createFileValidation({
+      certificate,
+      projectDir,
+    });
   } catch (error: any) {
     logger.error(error);
   }
