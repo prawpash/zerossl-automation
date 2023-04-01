@@ -164,11 +164,11 @@ const getValidationStatus = async ({ domain_id }: { domain_id: string }) => {
     const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/status${ROOT_URL_QUERY}`;
 
     const validation = await axios.get<{
-      validation_complete: number;
+      validation_completed: number;
       details?: { [key: string]: { method: string; status: string } };
     }>(ACTION_URL);
 
-    return validation.data.validation_complete;
+    return validation.data.validation_completed;
   } catch (error) {
     logger.error(error);
   }
