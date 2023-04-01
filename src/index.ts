@@ -188,6 +188,8 @@ const downloadCertificate = async ({ domain_id }: { domain_id: string }) => {
 
 const main = async () => {
   try {
+    if (!API_KEY) throw new Error("API_KEY Not Found");
+
     const { domain, csrPath, projectDir } = await yargs(hideBin(process.argv))
       .usage(
         "Usage: $0 --csr-path=[string] --domain=[string] --project-dir=[string]"
