@@ -95,23 +95,24 @@ const createFileValidation = async ({
   projectDir: string;
 }) => {
   try {
-    // Check if `/` character exist on end of data
+    // Check if `/` character exist on end of data and remove it
     const formattedProjectDir = projectDir.replace(/\/$/, "");
 
+    const wellFolderPath = `${formattedProjectDir}/.well-known`;
+
     // Check if folder .well-known exists in project directory
-    const isWellFolderExists = existsSync(`${formattedProjectDir}/.well-known`);
+    const isWellFolderExists = existsSync(wellFolderPath);
 
     // Make .well-known directory
-    if (!isWellFolderExists) mkdirSync(`${formattedProjectDir}/.well-known`);
+    if (!isWellFolderExists) mkdirSync(wellFolderPath);
+
+    const pkiValFolderPath = `${wellFolderPath}/pki-validation`;
 
     // Check if folder pki-validation exists in project directory
-    const isPkiValFolderExist = existsSync(
-      `${formattedProjectDir}/.well-known/pki-validation`
-    );
+    const isPkiValFolderExist = existsSync(pkiValFolderPath);
 
     // Make pki-validation directory
-    if (!isPkiValFolderExist)
-      mkdirSync(`${formattedProjectDir}/.well-known/pki-validation`);
+    if (!isPkiValFolderExist) mkdirSync(pkiValFolderPath);
 
     const firstKey = Object.keys(certificate.validation.other_methods)[0];
 
@@ -129,7 +130,7 @@ const createFileValidation = async ({
 
     await writeFile(fileName, fileContent, { encoding: "utf-8", flag: "w" });
 
-    return `${formattedProjectDir}/.well-known/pki-validation/${fileName}`;
+    return `${pkiValFolderPath}/${fileName}`;
   } catch (error) {
     logger.error(error);
   }
