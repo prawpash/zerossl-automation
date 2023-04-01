@@ -248,6 +248,32 @@ const main = async () => {
 
       logger.info(`Validation Status: ${validationStatus}`);
     }
+
+    const downloadedCertificate = await downloadCertificate({
+      domain_id: certificate.id,
+    });
+
+    if (!downloadedCertificate)
+      throw new Error("Something went wrong when download the certificate");
+
+    logger.info("Certificate has been downloaded");
+
+    // Write certificate to file
+    await writeFile(
+      "./certificate.crt",
+      downloadedCertificate["certificate.crt"],
+      { encoding: "utf-8", flag: "w" }
+    );
+
+    logger.info("certificate.crt file has been created");
+
+    // Write ca bundle to file
+    await writeFile("./ca_bundle.crt", downloadedCertificate["ca_bundle.crt"], {
+      encoding: "utf-8",
+      flag: "w",
+    });
+
+    logger.info("ca_bundle.crt file has been created");
   } catch (error: any) {
     logger.error(error);
   }
