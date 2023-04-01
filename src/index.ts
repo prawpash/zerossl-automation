@@ -174,7 +174,13 @@ const getValidationStatus = async ({ domain_id }: { domain_id: string }) => {
   }
 };
 
-const downloadCertificate = async ({ domain_id }: { domain_id: string }) => {
+const downloadCertificate = async ({
+  domain_id,
+}: {
+  domain_id: string;
+}): Promise<
+  { "certificate.crt": string; "ca_bundle.crt": string } | undefined
+> => {
   try {
     const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/download/return${ROOT_URL_QUERY}`;
 
