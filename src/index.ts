@@ -72,7 +72,7 @@ const createCertificate = async ({
     }
 
     const formData = new FormData();
-    formData.append("certificate_domain", domain);
+    formData.append("certificate_domains", domain);
     formData.append("certificate_csr", csr);
     formData.append("certificates_validity_days", 90);
 
