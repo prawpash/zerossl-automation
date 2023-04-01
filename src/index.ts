@@ -136,6 +136,26 @@ const createFileValidation = async ({
   }
 };
 
+const verifyDomain = async ({ domain_id }: { domain_id: string }) => {
+  try {
+    const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/challenges${ROOT_URL_QUERY}`;
+
+    const formData = new FormData();
+    formData.append("validation_method", "HTTP_CSR_HASH");
+
+    const verify = await axios.post<
+      CreateCertificateResponse | { success: boolean; error: any }
+    >(ACTION_URL, formData);
+
+    // check if data has id key
+    if ("id" in verify.data) return verify.data.status;
+
+    throw new Error(verify.data.error);
+  } catch (error) {
+    logger.error(error);
+  }
+};
+
 const main = async () => {
   try {
     const { domain, csrPath, projectDir } = await yargs(hideBin(process.argv))
