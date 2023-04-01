@@ -171,6 +171,21 @@ const getValidationStatus = async ({ domain_id }: { domain_id: string }) => {
   }
 };
 
+const downloadCertificate = async ({ domain_id }: { domain_id: string }) => {
+  try {
+    const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/download/return${ROOT_URL_QUERY}`;
+
+    const certificate = await axios.get<{
+      "certificate.crt": string;
+      "ca_bundle.crt": string;
+    }>(ACTION_URL);
+
+    return certificate.data;
+  } catch (error) {
+    logger.error(error);
+  }
+};
+
 const main = async () => {
   try {
     const { domain, csrPath, projectDir } = await yargs(hideBin(process.argv))
