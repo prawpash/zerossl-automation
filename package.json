@@ -4,7 +4,7 @@
   "description": "Aplikasi untuk menautomatisasi proses pembuatan certificate pada platform zerossl",
   "main": "./src/index.ts",
   "scripts": {
-    "start": "ts-node ./src/index"
+    "start": "ts-node ./src/index.ts"
   },
   "author": "prawira",
   "license": "MIT",
