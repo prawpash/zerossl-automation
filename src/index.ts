@@ -33,6 +33,10 @@ const logger = pino({
   },
 });
 
+const sleep = async (milisecond: number) => {
+  return new Promise((resolve) => setTimeout(resolve, milisecond));
+};
+
 const validateCSR = async ({ csr }: { csr: string }) => {
   try {
     const ACTION_URL = `${ROOT_URL}/validation/csr${ROOT_URL_QUERY}`;
