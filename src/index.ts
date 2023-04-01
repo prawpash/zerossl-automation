@@ -228,11 +228,6 @@ const main = async () => {
       domain_id: certificate.id,
     });
 
-    if (!validationStatus)
-      throw new Error(
-        "Something went wrong when get validation status of domain"
-      );
-
     logger.info(`Validation Status: ${validationStatus}`);
 
     // loop to get validation status until get value = 1
