@@ -214,11 +214,19 @@ const main = async () => {
 
     const verification = await verifyDomain({ domain_id: certificate.id });
 
+    if (!verification)
+      throw new Error("Something went wrong when verify the domain");
+
     logger.info(`Status : ${verification}`);
 
     let validationStatus = await getValidationStatus({
       domain_id: certificate.id,
     });
+
+    if (!validationStatus)
+      throw new Error(
+        "Something went wrong when get validation status of domain"
+      );
 
     logger.info(`Validation Status: ${validationStatus}`);
 
