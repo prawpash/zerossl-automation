@@ -128,7 +128,10 @@ const createFileValidation = async ({
         firstKey
       ].file_validation_content.join("\n");
 
-    await writeFile(fileName, fileContent, { encoding: "utf-8", flag: "w" });
+    await writeFile(`${pkiValFolderPath}/${fileName}`, fileContent, {
+      encoding: "utf-8",
+      flag: "w",
+    });
 
     return `${pkiValFolderPath}/${fileName}`;
   } catch (error) {
