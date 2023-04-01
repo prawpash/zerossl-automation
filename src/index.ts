@@ -196,6 +196,35 @@ const main = async () => {
 
     logger.info("Validation file has been created");
     logger.info(validationFile);
+
+    const verification = await verifyDomain({ domain_id: certificate.id });
+
+    logger.info(`Status : ${verification}`);
+
+    let validationStatus = await getValidationStatus({
+      domain_id: certificate.id,
+    });
+
+    logger.info(`Validation Status: ${validationStatus}`);
+
+    // loop to get validation status until get value = 1
+    let iteration = 0;
+
+    while (validationStatus == 0) {
+      // stop looping when iteration variable equal 3
+      if (iteration == 3)
+        throw new Error("Something went wrong when validating domain");
+
+      await sleep(30000);
+
+      validationStatus = await getValidationStatus({
+        domain_id: certificate.id,
+      });
+
+      iteration++;
+
+      logger.info(`Validation Status: ${validationStatus}`);
+    }
   } catch (error: any) {
     logger.error(error);
   }
