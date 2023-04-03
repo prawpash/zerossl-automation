@@ -65,11 +65,11 @@ const createCertificate = async ({
   try {
     const ACTION_URL = `${ROOT_URL}/certificates${ROOT_URL_QUERY}`;
 
-    // const isCSRValid = await validateCSR({ csr });
-    //
-    // if (!isCSRValid) {
-    //   throw new Error("CSR is not valid");
-    // }
+    const isCSRValid = await validateCSR({ csr });
+
+    if (!isCSRValid) {
+      throw new Error("CSR is not valid");
+    }
 
     const formData = new FormData();
     formData.append("certificate_domains", domain);
