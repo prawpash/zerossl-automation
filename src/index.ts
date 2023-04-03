@@ -153,7 +153,7 @@ const verifyDomain = async ({ domain_id }: { domain_id: string }) => {
     // check if data has id key
     if ("id" in verify.data) return verify.data.status;
 
-    throw new Error(verify.data.error);
+    throw new Error(JSON.stringify(verify.data.error));
   } catch (error) {
     logger.error(error);
   }
