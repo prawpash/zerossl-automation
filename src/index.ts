@@ -38,21 +38,17 @@ const sleep = async (milisecond: number) => {
 };
 
 const validateCSR = async ({ csr }: { csr: string }) => {
-  try {
-    const ACTION_URL = `${ROOT_URL}/validation/csr${ROOT_URL_QUERY}`;
+  const ACTION_URL = `${ROOT_URL}/validation/csr${ROOT_URL_QUERY}`;
 
-    const formData = new FormData();
-    formData.append("csr", csr);
+  const formData = new FormData();
+  formData.append("csr", csr);
 
-    const validateStatus = await axios.post<{
-      valid: boolean;
-      error: any;
-    }>(ACTION_URL, formData);
+  const validateStatus = await axios.post<{
+    valid: boolean;
+    error: any;
+  }>(ACTION_URL, formData);
 
-    return validateStatus.data.valid;
-  } catch (error: any) {
-    logger.error(error);
-  }
+  return validateStatus.data.valid;
 };
 
 const createCertificate = async ({
@@ -62,29 +58,25 @@ const createCertificate = async ({
   csr: string;
   domain: string;
 }): Promise<CreateCertificateResponse | undefined> => {
-  try {
-    const ACTION_URL = `${ROOT_URL}/certificates${ROOT_URL_QUERY}`;
+  const ACTION_URL = `${ROOT_URL}/certificates${ROOT_URL_QUERY}`;
 
-    const isCSRValid = await validateCSR({ csr });
+  const isCSRValid = await validateCSR({ csr });
 
-    if (!isCSRValid) {
-      throw new Error("CSR is not valid");
-    }
-
-    const formData = new FormData();
-    formData.append("certificate_domains", domain);
-    formData.append("certificate_csr", csr);
-    formData.append("certificates_validity_days", 90);
-
-    const requestCertificate = await axios.post<CreateCertificateResponse>(
-      ACTION_URL,
-      formData
-    );
-
-    return requestCertificate.data;
-  } catch (error) {
-    logger.error(error);
+  if (!isCSRValid) {
+    throw new Error("CSR is not valid");
   }
+
+  const formData = new FormData();
+  formData.append("certificate_domains", domain);
+  formData.append("certificate_csr", csr);
+  formData.append("certificates_validity_days", 90);
+
+  const requestCertificate = await axios.post<CreateCertificateResponse>(
+    ACTION_URL,
+    formData
+  );
+
+  return requestCertificate.data;
 };
 
 const createFileValidation = async ({
@@ -94,84 +86,72 @@ const createFileValidation = async ({
   certificate: CreateCertificateResponse;
   projectDir: string;
 }) => {
-  try {
-    // Check if `/` character exist on end of data and remove it
-    const formattedProjectDir = projectDir.replace(/\/$/, "");
+  // Check if `/` character exist on end of data and remove it
+  const formattedProjectDir = projectDir.replace(/\/$/, "");
 
-    const wellFolderPath = `${formattedProjectDir}/.well-known`;
+  const wellFolderPath = `${formattedProjectDir}/.well-known`;
 
-    // Check if folder .well-known exists in project directory
-    const isWellFolderExists = existsSync(wellFolderPath);
+  // Check if folder .well-known exists in project directory
+  const isWellFolderExists = existsSync(wellFolderPath);
 
-    // Make .well-known directory
-    if (!isWellFolderExists) mkdirSync(wellFolderPath);
+  // Make .well-known directory
+  if (!isWellFolderExists) mkdirSync(wellFolderPath);
 
-    const pkiValFolderPath = `${wellFolderPath}/pki-validation`;
+  const pkiValFolderPath = `${wellFolderPath}/pki-validation`;
 
-    // Check if folder pki-validation exists in project directory
-    const isPkiValFolderExist = existsSync(pkiValFolderPath);
+  // Check if folder pki-validation exists in project directory
+  const isPkiValFolderExist = existsSync(pkiValFolderPath);
 
-    // Make pki-validation directory
-    if (!isPkiValFolderExist) mkdirSync(pkiValFolderPath);
+  // Make pki-validation directory
+  if (!isPkiValFolderExist) mkdirSync(pkiValFolderPath);
 
-    const firstKey = Object.keys(certificate.validation.other_methods)[0];
+  const firstKey = Object.keys(certificate.validation.other_methods)[0];
 
-    const splitValidationPath =
-      certificate.validation.other_methods[
-        firstKey
-      ].file_validation_url_http.split("/");
+  const splitValidationPath =
+    certificate.validation.other_methods[
+      firstKey
+    ].file_validation_url_http.split("/");
 
-    const fileName = splitValidationPath[splitValidationPath.length - 1];
+  const fileName = splitValidationPath[splitValidationPath.length - 1];
 
-    const fileContent =
-      certificate.validation.other_methods[
-        firstKey
-      ].file_validation_content.join("\n");
+  const fileContent =
+    certificate.validation.other_methods[firstKey].file_validation_content.join(
+      "\n"
+    );
 
-    await writeFile(`${pkiValFolderPath}/${fileName}`, fileContent, {
-      encoding: "utf-8",
-      flag: "w",
-    });
+  await writeFile(`${pkiValFolderPath}/${fileName}`, fileContent, {
+    encoding: "utf-8",
+    flag: "w",
+  });
 
-    return `${pkiValFolderPath}/${fileName}`;
-  } catch (error) {
-    logger.error(error);
-  }
+  return `${pkiValFolderPath}/${fileName}`;
 };
 
 const verifyDomain = async ({ domain_id }: { domain_id: string }) => {
-  try {
-    const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/challenges${ROOT_URL_QUERY}`;
+  const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/challenges${ROOT_URL_QUERY}`;
 
-    const formData = new FormData();
-    formData.append("validation_method", "HTTP_CSR_HASH");
+  const formData = new FormData();
+  formData.append("validation_method", "HTTP_CSR_HASH");
 
-    const verify = await axios.post<
-      CreateCertificateResponse | { success: boolean; error: any }
-    >(ACTION_URL, formData);
+  const verify = await axios.post<
+    CreateCertificateResponse | { success: boolean; error: any }
+  >(ACTION_URL, formData);
 
-    // check if data has id key
-    if ("id" in verify.data) return verify.data.status;
+  // check if data has id key
+  if ("id" in verify.data) return verify.data.status;
 
-    throw new Error(JSON.stringify(verify.data.error));
-  } catch (error) {
-    logger.error(error);
-  }
+  throw new Error(JSON.stringify(verify.data.error));
 };
 
 const getValidationStatus = async ({ domain_id }: { domain_id: string }) => {
-  try {
-    const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/status${ROOT_URL_QUERY}`;
+  const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/status${ROOT_URL_QUERY}`;
 
-    const validation = await axios.get<{
-      validation_completed: number;
-      details?: { [key: string]: { method: string; status: string } };
-    }>(ACTION_URL);
+  const validation = await axios.get<{
+    validation_completed: number;
+    details?: { [key: string]: { method: string; status: string } };
+  }>(ACTION_URL);
 
-    return validation.data.validation_completed;
-  } catch (error) {
-    logger.error(error);
-  }
+  return validation.data.validation_completed;
 };
 
 const downloadCertificate = async ({
@@ -181,18 +161,14 @@ const downloadCertificate = async ({
 }): Promise<
   { "certificate.crt": string; "ca_bundle.crt": string } | undefined
 > => {
-  try {
-    const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/download/return${ROOT_URL_QUERY}`;
+  const ACTION_URL = `${ROOT_URL}/certificates/${domain_id}/download/return${ROOT_URL_QUERY}`;
 
-    const certificate = await axios.get<{
-      "certificate.crt": string;
-      "ca_bundle.crt": string;
-    }>(ACTION_URL);
+  const certificate = await axios.get<{
+    "certificate.crt": string;
+    "ca_bundle.crt": string;
+  }>(ACTION_URL);
 
-    return certificate.data;
-  } catch (error) {
-    logger.error(error);
-  }
+  return certificate.data;
 };
 
 const main = async () => {
@@ -282,6 +258,7 @@ const main = async () => {
     logger.info("ca_bundle.crt file has been created");
   } catch (error: any) {
     logger.error(error);
+    process.exit(1);
   }
 };
 
